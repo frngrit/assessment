@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"database/sql"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
@@ -65,5 +66,27 @@ func (h handler) GetExpenseById(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, Err{err.Error()})
 	}
 
+	return c.JSON(http.StatusOK, expense)
+}
+
+func (h handler) UpdateExpenseById(c echo.Context) error {
+	expense := Expense{}
+	c.Bind(&expense)
+	rowId := c.Param("id")
+
+	//check if user provide body parameter correctly
+	if expense.Title == "" || expense.Note == "" || expense.Amount == 0 || expense.Tags == nil {
+		return c.JSON(http.StatusBadRequest, Err{"bad body request"})
+	}
+
+	stmt, err := h.DB.Prepare("UPDATE expenses SET title=$1, amount=$2, note=$3, tags=$4 WHERE id=$5;")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{err.Error()})
+	}
+
+	if _, err := stmt.Exec(&expense.Title, &expense.Amount, &expense.Note, pq.Array(&expense.Tags), rowId); err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{err.Error()})
+	}
+	expense.Id, _ = strconv.Atoi(rowId)
 	return c.JSON(http.StatusOK, expense)
 }
