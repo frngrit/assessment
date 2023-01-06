@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"database/sql"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
@@ -86,6 +87,6 @@ func (h handler) UpdateExpenseById(c echo.Context) error {
 	if _, err := stmt.Exec(&expense.Title, &expense.Amount, &expense.Note, pq.Array(&expense.Tags), rowId); err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{err.Error()})
 	}
-
+	expense.Id, _ = strconv.Atoi(rowId)
 	return c.JSON(http.StatusOK, expense)
 }
