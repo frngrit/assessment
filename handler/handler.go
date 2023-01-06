@@ -90,3 +90,26 @@ func (h handler) UpdateExpenseById(c echo.Context) error {
 	expense.Id, _ = strconv.Atoi(rowId)
 	return c.JSON(http.StatusOK, expense)
 }
+
+func (h handler) GetAllExpense(c echo.Context) error {
+	expenses := []Expense{}
+
+	stmt, err := h.DB.Prepare("SELECT * FROM expenses")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{err.Error()})
+	}
+	rows, err := stmt.Query()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{err.Error()})
+	}
+	for rows.Next() {
+		expense := Expense{}
+		err := rows.Scan(&expense.Id, &expense.Title, &expense.Amount, &expense.Note, pq.Array(&expense.Tags))
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, Err{err.Error()})
+		}
+		expenses = append(expenses, expense)
+	}
+
+	return c.JSON(http.StatusOK, expenses)
+}
