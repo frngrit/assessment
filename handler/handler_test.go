@@ -109,7 +109,7 @@ func TestGetExpenseById(t *testing.T) {
 func TestUpdateExpenseById(t *testing.T) {
 	// Arrange
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/expenses", strings.NewReader(`
+	req := httptest.NewRequest(http.MethodPut, "/expenses/1", strings.NewReader(`
 	{
 		"id": 1,
 		"title": "strawberry smoothie",
@@ -143,8 +143,8 @@ func TestUpdateExpenseById(t *testing.T) {
 
 	h := handler{db}
 	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues("1")
+	c.SetParamNames("id") //set path params
+	c.SetParamValues("1") //set path params
 	expected := "{\"id\":1,\"title\":\"strawberry smoothie\",\"amount\":89,\"note\":\"no discount\",\"tags\":[\"beverage\"]}"
 
 	// Act
