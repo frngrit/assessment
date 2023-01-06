@@ -48,3 +48,22 @@ func (h handler) CreateExpenseHandler(c echo.Context) error {
 	expense.Id = id
 	return c.JSON(http.StatusCreated, expense)
 }
+
+func (h handler) GetExpenseById(c echo.Context) error {
+	expense := Expense{}
+
+	stmt, err := h.DB.Prepare("SELECT * FROM expenses WHERE id=$1")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{err.Error()})
+	}
+
+	rowId := c.Param("id")
+	rows := stmt.QueryRow(rowId)
+
+	err = rows.Scan(&expense.Id, &expense.Title, &expense.Amount, &expense.Note, pq.Array(&expense.Tags))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, expense)
+}
