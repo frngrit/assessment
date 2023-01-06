@@ -107,22 +107,6 @@ func TestITGetExpenseById(t *testing.T) {
 			log.Fatal(err)
 		}
 
-		// createTable := ` DROP TABLE IF EXISTS expenses;
-		// 	CREATE TABLE expenses (
-		// 	id SERIAL PRIMARY KEY,
-		// 	title TEXT,
-		// 	amount FLOAT,
-		// 	note TEXT,
-		// 	tags TEXT[]
-		// );`
-
-		// _, err = db.Exec(createTable)
-
-		// if err != nil {
-		// 	log.Fatal("connection to database error", err)
-		// 	return
-		// }
-
 		h := NewApplication(db)
 
 		e.GET("/expenses/:id", h.GetExpenseById)

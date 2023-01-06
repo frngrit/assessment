@@ -26,6 +26,7 @@ func main() {
 
 	e.POST("/expenses", h.CreateExpenseHandler)
 	e.GET("/expenses/:id", h.GetExpenseById)
+	e.PUT("/expenses/:id", h.UpdateExpenseById)
 	go func() {
 		if err := e.Start(os.Getenv("PORT")); err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatal("shutting down the server")
