@@ -91,7 +91,7 @@ func (h handler) UpdateExpenseById(c echo.Context) error {
 	return c.JSON(http.StatusOK, expense)
 }
 
-func (h handler) GetAllExpense(c echo.Context) error {
+func (h handler) GetAllExpenses(c echo.Context) error {
 	expenses := []Expense{}
 
 	stmt, err := h.DB.Prepare("SELECT * FROM expenses")
