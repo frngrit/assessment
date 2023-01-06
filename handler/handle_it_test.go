@@ -211,3 +211,57 @@ func TestITUpdateExpenseById(t *testing.T) {
 	err = eh.Shutdown(ctx)
 	assert.NoError(t, err)
 }
+
+func TestITGetAllExpenses(t *testing.T) {
+
+	// Setup server
+	eh := echo.New()
+	go func(e *echo.Echo) {
+		db, err := sql.Open("postgres", "postgresql://root:root@db/go-example-db?sslmode=disable")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		h := NewApplication(db)
+
+		e.GET("/expenses", h.GetAllExpenses)
+		e.Start(fmt.Sprintf(":%v", serverPort))
+	}(eh)
+	for {
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%v", serverPort), 30*time.Second)
+		if err != nil {
+			log.Println(err)
+		}
+		if conn != nil {
+			conn.Close()
+			break
+		}
+	}
+	// Arrange
+	reqBody := ``
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%v/expenses", serverPort), strings.NewReader(reqBody))
+	assert.NoError(t, err)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	client := http.Client{}
+
+	// Act
+	resp, err := client.Do(req)
+	assert.NoError(t, err)
+
+	byteBody, err := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	resp.Body.Close()
+
+	// Assertions
+	expected := "[{\"id\":1,\"title\":\"apple smoothie\",\"amount\":89,\"note\":\"no discount\",\"tags\":[\"beverage\"]}]"
+
+	if assert.NoError(t, err) {
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Equal(t, expected, strings.TrimSpace(string(byteBody)))
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err = eh.Shutdown(ctx)
+	assert.NoError(t, err)
+}
