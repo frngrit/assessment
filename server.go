@@ -7,11 +7,15 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/frngrit/assessment/db"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
 
 func main() {
+
+	//connect to db
+	db.StartDB()
 
 	//initial server
 	e := echo.New()
