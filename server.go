@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/frngrit/assessment/db"
+	"github.com/frngrit/assessment/handler"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
@@ -20,6 +21,10 @@ func main() {
 	//initial server
 	e := echo.New()
 	e.Logger.SetLevel(log.INFO)
+
+	h := handler.NewApplication(db.DB)
+
+	e.POST("/expenses", h.CreateExpenseHandler)
 
 	go func() {
 		if err := e.Start(os.Getenv("PORT")); err != nil && err != http.ErrServerClosed {
